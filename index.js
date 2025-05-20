@@ -1,6 +1,6 @@
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const express = require('express');
-const cors = require('cors');
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -10,7 +10,8 @@ app.use(express.json());
 // 8cmIeHFeopGT7SVc
 // Plant-Care-Tracker
 
-const uri = "mongodb+srv://Plant-Care-Tracker:8cmIeHFeopGT7SVc@cluster001.bmpze7a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster001";
+const uri =
+  "mongodb+srv://Plant-Care-Tracker:8cmIeHFeopGT7SVc@cluster001.bmpze7a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster001";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -18,55 +19,76 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
   try {
     await client.connect();
-    const plantCollection = client.db('PlantDB').collection('plants');
-    const userCollection = client.db('PlantDB').collection('users');
-
+    const plantCollection = client.db("PlantDB").collection("plants");
+    const userCollection = client.db("PlantDB").collection("users");
 
     // post plants
-    app.post('/plants', async(req, res) => {
-       const plant = req.body;
-       const result = await plantCollection.insertOne(plant);
-       res.send(result);
-    })
-    
+    app.post("/plants", async (req, res) => {
+      const plant = req.body;
+      const result = await plantCollection.insertOne(plant);
+      res.send(result);
+    });
+
     // get all plants
-    app.get('/plants', async(req, res) => {
-        const result = await plantCollection.find().toArray();
-        res.send(result)
-    })
+    app.get("/plants", async (req, res) => {
+      const result = await plantCollection.find().toArray();
+      res.send(result);
+    });
     // get single plant
-    app.get('/plants/:id', async(req, res) => {
+    app.get("/plants/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await plantCollection.findOne(query);
       res.send(result);
-    })
+    });
+    // Delete a plant
+    app.delete("/plants/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await plantCollection.deleteOne(query);
+      res.send(result);
+    });
 
-
-
-
+    // Update a plant
+    // app.put("/plants/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const options = { upsert: true };
+    //   const updatePlant = req.body;
+    //   const updateDoc = {
+    //     $set: {
+    //       updatePlant,
+    //     },
+    //   };
+    //   const result = await plantCollection.updateOne(
+    //     filter,
+    //     updateDoc,
+    //     options
+    //   );
+    //   res.send(result);
+    // });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // await client.close();
   }
 }
 run().catch(console.dir);
 
-
-
-app.get('/', (req, res) => {
-    res.send("Plant Care Tracker Server!")
-})
+app.get("/", (req, res) => {
+  res.send("Plant Care Tracker Server!");
+});
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-})
+  console.log(`Server is running on port ${port}`);
+});
