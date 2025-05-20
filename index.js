@@ -56,23 +56,24 @@ async function run() {
     });
 
     // Update a plant
-    // app.put("/plants/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const options = { upsert: true };
-    //   const updatePlant = req.body;
-    //   const updateDoc = {
-    //     $set: {
-    //       updatePlant,
-    //     },
-    //   };
-    //   const result = await plantCollection.updateOne(
-    //     filter,
-    //     updateDoc,
-    //     options
-    //   );
-    //   res.send(result);
-    // });
+    app.put("/plants/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatePlant = req.body;
+      console.log(updatePlant);
+      const updateDoc = {
+        $set: {
+          updatePlant,
+        },
+      };
+      const result = await plantCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
