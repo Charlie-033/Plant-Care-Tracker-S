@@ -26,7 +26,6 @@ async function run() {
   try {
     await client.connect();
     const plantCollection = client.db("PlantDB").collection("plants");
-    const userCollection = client.db("PlantDB").collection("users");
 
     // post plants
     app.post("/plants", async (req, res) => {
@@ -40,6 +39,14 @@ async function run() {
       const result = await plantCollection.find().toArray();
       res.send(result);
     });
+
+     // Get recently added 6 plants
+    app.get("/plants/recent", async (req, res) => {
+      const cursor = plantCollection.find().sort({ _id: -1 }).limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // get single plant
     app.get("/plants/:id", async (req, res) => {
       const id = req.params.id;
@@ -47,7 +54,7 @@ async function run() {
       const result = await plantCollection.findOne(query);
       res.send(result);
     });
-    // Delete a plant
+    // Delete a plant by user
     app.delete("/plants/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -81,14 +88,8 @@ async function run() {
       res.send(result);
     });
 
-    // Delete a plant by user
-    app.delete("/plants/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await plantCollection.deleteOne(query);
-      res.send(result);
-    });
-
+   
+  
 
 
 
