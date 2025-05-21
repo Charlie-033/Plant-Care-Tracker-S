@@ -63,15 +63,21 @@ async function run() {
       const updatePlant = req.body;
       console.log(updatePlant);
       const updateDoc = {
-        $set: {
-          updatePlant,
-        },
+        $set: updatePlant,
       };
       const result = await plantCollection.updateOne(
         filter,
         updateDoc,
         options
       );
+      res.send(result);
+    });
+
+    // Plant by user
+    app.get("/plants/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const result = await plantCollection.find(query).toArray();
       res.send(result);
     });
 
