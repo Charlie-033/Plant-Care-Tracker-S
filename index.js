@@ -34,15 +34,40 @@ async function run() {
       res.send(result);
     });
 
-    // get all plants
-    app.get("/plants", async (req, res) => {
-      const result = await plantCollection.find().toArray();
+    // Get recently added 6 plants
+    app.get("/plants/recent", async (req, res) => {
+      const cursor = plantCollection.find().sort({ _id: -1 }).limit(6);
+      const result = await cursor.toArray();
       res.send(result);
     });
 
-     // Get recently added 6 plants
-    app.get("/plants/recent", async (req, res) => {
-      const cursor = plantCollection.find().sort({ _id: -1 }).limit(6);
+    // Get Sort by Watering Frequency and get all plants
+    app.get("/plants", async (req, res) => {
+      const sortKey = req.query.sort;
+      let sortOptions = {};
+      if (sortKey === "wateringFrequency") {
+        sortOptions = { wateringFrequency: 1 };
+        const result = await plantCollection.find().sort(sortOptions).toArray();
+        res.send(result);
+      } else if (sortKey === "careLevel") {
+        const result = await plantCollection
+          .aggregate([
+            {
+              $addFields: {
+                careLevelOrder: {
+                  $indexOfArray: [
+                    ["Easy", "Moderate", "Difficult"],
+                    "$careLevel",
+                  ],
+                },
+              },
+            },
+            { $sort: { careLevelOrder: 1 } },
+            { $project: { careLevelOrder: 0 } },
+          ]).toArray();
+          res.send(result);
+      }
+      const cursor = plantCollection.find().sort();
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -87,12 +112,6 @@ async function run() {
       const result = await plantCollection.find(query).toArray();
       res.send(result);
     });
-
-   
-  
-
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
