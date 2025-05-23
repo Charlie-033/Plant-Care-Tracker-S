@@ -10,8 +10,7 @@ app.use(express.json());
 // 8cmIeHFeopGT7SVc
 // Plant-Care-Tracker
 
-const uri =
-  "mongodb+srv://Plant-Care-Tracker:8cmIeHFeopGT7SVc@cluster001.bmpze7a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster001";
+const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster001.bmpze7a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster001`
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
