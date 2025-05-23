@@ -6,7 +6,10 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+require('dotenv').config();
 
+// ${process.env.DB_USER}
+// ${process.env.DB_PASSWORD}
 // 8cmIeHFeopGT7SVc
 // Plant-Care-Tracker
 
