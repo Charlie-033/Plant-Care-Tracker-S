@@ -35,7 +35,7 @@ async function run() {
 
     // Get recently added 6 plants
     app.get("/plants/recent", async (req, res) => {
-      const cursor = plantCollection.find().sort({ _id: -1 }).limit(6);
+      const cursor = plantCollection.find().sort({ _id: -1 }).limit(8);
       const result = await cursor.toArray();
       res.send(result);
     });
