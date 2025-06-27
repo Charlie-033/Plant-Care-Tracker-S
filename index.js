@@ -3,14 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3001;
-require('dotenv').config();
+require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
 
 // console.log(process.env.DB_USER, process.env.DB_PASSWORD);
 
-const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster001.bmpze7a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster001`
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster001.bmpze7a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster001`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -63,8 +63,9 @@ async function run() {
             },
             { $sort: { careLevelOrder: 1 } },
             { $project: { careLevelOrder: 0 } },
-          ]).toArray();
-          res.send(result);
+          ])
+          .toArray();
+        res.send(result);
       }
       const cursor = plantCollection.find().sort();
       const result = await cursor.toArray();
@@ -110,6 +111,58 @@ async function run() {
       const query = { userEmail: email };
       const result = await plantCollection.find(query).toArray();
       res.send(result);
+    });
+    // Dashboard
+    app.get("/dashboard/overview", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        return res.status(400).send({ error: "Missing email query parameter" });
+      }
+
+      try {
+        const totalPlants = await plantCollection.estimatedDocumentCount();
+
+        const myPlantsCount = await plantCollection.countDocuments({
+          userEmail: email,
+        });
+        const topCategoryAgg = await plantCollection
+          .aggregate([
+            { $match: { userEmail: email } },
+            { $group: { _id: "$category", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 1 },
+          ])
+          .toArray();
+
+        const topCategory = topCategoryAgg[0]?._id || "No plants yet";
+        const topCategoryCount = topCategoryAgg[0]?.count || 0;
+
+        res.send({
+          totalPlants,
+          myPlantsCount,
+          topCategory,
+          topCategoryCount,
+        });
+      } catch (err) {
+        res
+          .status(500)
+          .send({ error: "Internal server error", message: err.message });
+      }
+    });
+    // Easy care plants
+    app.get("/easycare-plants", async (req, res) => {
+      try {
+        // Find all plants where careLevel === "easy"
+        const easyCarePlants = await plantCollection
+          .find({ careLevel: "Easy" })
+          .toArray();
+
+        // Send the array as JSON response
+        res.status(200).send(easyCarePlants);
+      } catch (error) {
+        console.error("Error fetching easy care plants:", error);
+        res.status(500).send({ error: "Internal Server Error" });
+      }
     });
 
     // Send a ping to confirm a successful connection
